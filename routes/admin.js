@@ -124,50 +124,41 @@ adminRouter.post("/add-course", adminAuthMiddleware, async function (req, res) {
 })
 
 adminRouter.put("/course", adminAuthMiddleware, async function (req, res) {
-  const courseId = req.body.courseId;
-  console.log(courseId);
+  const adminId=req.userId;  // this is req.userId bcoz, we are setting the same in middleWare. Check.
 
-  const course = await courseModel.findById(new mongoose.Types.ObjectId(courseId));
+  const { title, description, imageUrl, price, courseId } = req.body;
 
-  if (!course) {
-    return res.status(403).json({
-      message: "No course found with this id"
-    })
+  const course = await courseModel.updateOne({
+    _id: courseId,
+    creatorId: adminId
+  }, {
+    title: title,
+    description: description,
+    imageUrl: imageUrl,
+    price: price
   }
+  )
 
-  console.log(course);
-
-  if (req.body.title) {
-    course.title = req.body.title;
-  }
-
-  if (req.body.description) {
-    course.description = req.body.description;
-  }
-
-  if (req.body.imageUrl) {
-    course.imageUrl = req.body.imageUrl;
-  }
-
-  if (req.body.price) {
-    course.price = req.body.price;
-  }
-
-  await course.save();
-
-  console.log("After update:", course);
-
-  return res.status(400).json({
-    message: "Course updated"
+  res.json({
+    message:"Course updated",
+    courseId: course._id
   })
 
 
 })
 
 adminRouter.get("/course/bulk", adminAuthMiddleware, async function (req, res) {
+  const adminId=req.userId;
+  
+  const courses = await courseModel.find({
+    creatorId: adminId
+  });
+
   res.json({
-    message: "Course by admin"
+    message:"Courses",
+    courses
   })
+
 })
 
 module.exports = {
