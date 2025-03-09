@@ -7,27 +7,11 @@ const { userModel } = require("../db");
 const bcrypt = require("bcrypt");
 
 const jwt = require("jsonwebtoken");
-const JWT_USER_SECRET = "jaiswalsudhanshu20User";
+const {JWT_USER_SECRET} = require("../config");
 
 const { z } = require("zod");
 
 userRouter.use(express.json());
-
-function userAuthMiddleware(req, res, next) {
-
-  const token = req.headers.token;
-  const decodedData = jwt.verify(token, JWT_USER_SECRET);
-
-  if (decodedData) {
-    //check here again for userId values
-    req.userId = decodedData.id;
-    next();
-  } else {
-    res.status(403).json({
-      message: "Invalid token"
-    })
-  }
-}
 
 userRouter.post("/sign-up", async function (req, res) {
 

@@ -1,31 +1,18 @@
 const { Router } = require("express");
-const express=require("express");
+const express = require("express");
 const adminRouter = Router();
 const { adminModel } = require("../db");
 
 const bcrypt = require("bcrypt");
 
 const jwt = require("jsonwebtoken");
-const JWT_ADMIN_SECRET = "jaiswalsudhanshu20";
+const { JWT_ADMIN_SECRET } = require("../config");
 
-const {z}=require("zod");
+const { z } = require("zod");
+const { adminAuthMiddleware } = require("../middleware/admin");
 
 adminRouter.use(express.json());
 
-function adminAuthMiddleware(req, res, next) {
-  const token = req.headers.token;
-  const decodedData = jwt.verify(token, JWT_ADMIN_SECRET);
-
-  if (decodedData) {
-    //check here again for userId values
-    req.userId = decodedData.id;
-    next();
-  } else {
-    res.status(403).json({
-      message: "Invalid token"
-    })
-  }
-}
 
 adminRouter.post("/sign-up", async function (req, res) {
 
@@ -79,43 +66,43 @@ adminRouter.post("/sign-up", async function (req, res) {
 
 });
 
-adminRouter.post("/sign-in",async function (req, res) {
+adminRouter.post("/sign-in", async function (req, res) {
 
-  const email=req.body.email;
-  const password=req.body.password;
+  const email = req.body.email;
+  const password = req.body.password;
 
-  const admin=await adminModel.findOne({
-    email:email
+  const admin = await adminModel.findOne({
+    email: email
   });
 
-  if(!admin){
+  if (!admin) {
     res.status(403).json({
-      message:"No user found with this email and password"
+      message: "No user found with this email and password"
     })
   }
 
-  const passwordMatch=await bcrypt.compare(password,admin.password);
+  const passwordMatch = await bcrypt.compare(password, admin.password);
 
   console.log(admin);
 
-  if(passwordMatch){
-    const token=jwt.sign({
-      id:admin._id.toString()
-    },JWT_ADMIN_SECRET);
+  if (passwordMatch) {
+    const token = jwt.sign({
+      id: admin._id.toString()
+    }, JWT_ADMIN_SECRET);
 
     res.json({
-      token:token
+      token: token
     });
-   
-  }else{
+
+  } else {
     res.status(403).json({
-      message:"No user found with this email and password"
-    });  
+      message: "No user found with this email and password"
+    });
   }
 
 });
 
-adminRouter.post("/add-course", function (req, res) {
+adminRouter.post("/add-course", adminAuthMiddleware, function (req, res) {
   res.json({
     message: "Course created by admin"
   })
