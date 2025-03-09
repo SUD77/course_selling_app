@@ -1,7 +1,7 @@
 const { Router } = require("express");
 const express = require("express");
 const adminRouter = Router();
-const { adminModel } = require("../db");
+const { adminModel, courseModel } = require("../db");
 
 const bcrypt = require("bcrypt");
 
@@ -102,16 +102,28 @@ adminRouter.post("/sign-in", async function (req, res) {
 
 });
 
-adminRouter.post("/add-course", adminAuthMiddleware, function (req, res) {
+adminRouter.post("/add-course", adminAuthMiddleware, async function (req, res) {
+  const adminId = req.userId;
+
+  const { title, description, imageUrl, price } = req.body;
+
+  const course=await courseModel.create({
+    title: title,
+    description: description,
+    imageUrl: imageUrl,
+    price: price, 
+    creatorId: adminId
+  })
+
+
   res.json({
-    message: "Course created by admin"
+    message: "Course created",
+    courseId: course._id
   })
 })
 
-adminRouter.put("/course", function (req, res) {
-  res.json({
-    message: "Course edited by admin"
-  })
+adminRouter.put("/course",adminAuthMiddleware, async function (req, res) {
+  
 })
 
 adminRouter.get("/course/bulk", function (req, res) {
