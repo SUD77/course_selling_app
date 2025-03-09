@@ -29,8 +29,8 @@ function userAuthMiddleware(req, res, next) {
   }
 }
 
-userRouter.post("/sign-up",async function (req, res) {
-  
+userRouter.post("/sign-up", async function (req, res) {
+
   //input validation using zod
   const requiredBody = z.object({
     email: z.string().min(5).max(100).email(),
@@ -81,10 +81,40 @@ userRouter.post("/sign-up",async function (req, res) {
 
 });
 
-userRouter.post("/sign-in", function (req, res) {
-  res.json({
-    message: "singin endpoint"
-  })
+userRouter.post("/sign-in", async function (req, res) {
+
+  const email = req.body.email;
+  const password = req.body.password;
+
+  const user = await userModel.findOne({
+    email: email
+  });
+
+  if (!user) {
+    res.status(403).json({
+      message: "No user found with this email and password"
+    })
+  }
+
+  const passwordMatch = await bcrypt.compare(password, user.password);
+
+  console.log(user);
+
+  if (passwordMatch) {
+    const token = jwt.sign({
+      id: user._id.toString()
+    }, JWT_USER_SECRET);
+
+    res.json({
+      token: token
+    });
+
+  } else {
+    res.status(403).json({
+      message: "No user found with this email and password"
+    });
+  }
+
 });
 
 userRouter.get("/purchases", function (req, res) {
