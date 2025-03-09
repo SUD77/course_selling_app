@@ -2,7 +2,7 @@ const { Router } = require("express");
 const express = require("express");
 const userRouter = Router();
 
-const { userModel } = require("../db");
+const { userModel,purchaseModel } = require("../db");
 
 const bcrypt = require("bcrypt");
 
@@ -10,6 +10,7 @@ const jwt = require("jsonwebtoken");
 const {JWT_USER_SECRET} = require("../config");
 
 const { z } = require("zod");
+const { userAuthMiddleware } = require("../middleware/user");
 
 userRouter.use(express.json());
 
@@ -101,9 +102,15 @@ userRouter.post("/sign-in", async function (req, res) {
 
 });
 
-userRouter.get("/purchases", function (req, res) {
+userRouter.get("/purchases",userAuthMiddleware,async function (req, res) {
+  const userId=req.userId;
+
+  const purchases=await purchaseModel.find({
+    userId
+  });
+
   res.json({
-    message: "my purchased courses"
+    purchases
   })
 })
 
