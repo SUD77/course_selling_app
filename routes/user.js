@@ -1,9 +1,19 @@
-const {Router} = require("express");
-const userRouter=Router();
+const { Router } = require("express");
+const userRouter = Router();
 
-function userMiddleware(req,res,next){
-  console.log("user middleware");
-  next();
+const express = require("express");
+const { userModel } = require("../db");
+
+const bcrypt = require("bcrypt");
+
+const jwt = require("jsonwebtoken");
+const JWT_USER_SECRET = "jaiswalsudhanshu20User";
+
+const { z } = require("zod");
+
+function userAuthMiddleware(req, res, next) {
+
+ 
 }
 
 userRouter.post("/sign-up", function (req, res) {
@@ -25,6 +35,6 @@ userRouter.get("/purchases", function (req, res) {
 })
 
 
-module.exports={
+module.exports = {
   userRouter: userRouter
 }
