@@ -2,6 +2,7 @@ const { Router } = require("express");
 const express = require("express");
 const adminRouter = Router();
 const { adminModel, courseModel } = require("../db");
+const mongoose = require("mongoose");
 
 const bcrypt = require("bcrypt");
 
@@ -107,11 +108,11 @@ adminRouter.post("/add-course", adminAuthMiddleware, async function (req, res) {
 
   const { title, description, imageUrl, price } = req.body;
 
-  const course=await courseModel.create({
+  const course = await courseModel.create({
     title: title,
     description: description,
     imageUrl: imageUrl,
-    price: price, 
+    price: price,
     creatorId: adminId
   })
 
@@ -122,11 +123,48 @@ adminRouter.post("/add-course", adminAuthMiddleware, async function (req, res) {
   })
 })
 
-adminRouter.put("/course",adminAuthMiddleware, async function (req, res) {
-  
+adminRouter.put("/course", adminAuthMiddleware, async function (req, res) {
+  const courseId = req.body.courseId;
+  console.log(courseId);
+
+  const course = await courseModel.findById(new mongoose.Types.ObjectId(courseId));
+
+  if (!course) {
+    return res.status(403).json({
+      message: "No course found with this id"
+    })
+  }
+
+  console.log(course);
+
+  if (req.body.title) {
+    course.title = req.body.title;
+  }
+
+  if (req.body.description) {
+    course.description = req.body.description;
+  }
+
+  if (req.body.imageUrl) {
+    course.imageUrl = req.body.imageUrl;
+  }
+
+  if (req.body.price) {
+    course.price = req.body.price;
+  }
+
+  await course.save();
+
+  console.log("After update:", course);
+
+  return res.status(400).json({
+    message: "Course updated"
+  })
+
+
 })
 
-adminRouter.get("/course/bulk", function (req, res) {
+adminRouter.get("/course/bulk", adminAuthMiddleware, async function (req, res) {
   res.json({
     message: "Course by admin"
   })
