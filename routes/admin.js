@@ -6,7 +6,7 @@ const { adminModel } = require("../db");
 const bcrypt = require("bcrypt");
 
 const jwt = require("jsonwebtoken");
-const JWT_SECRET = "jaiswalsudhanshu20";
+const JWT_ADMIN_SECRET = "jaiswalsudhanshu20";
 
 const {z}=require("zod");
 
@@ -14,7 +14,7 @@ adminRouter.use(express.json());
 
 function adminAuthMiddleware(req, res, next) {
   const token = req.headers.token;
-  const decodedData = jwt.verify(token, JWT_SECRET);
+  const decodedData = jwt.verify(token, JWT_ADMIN_SECRET);
 
   if (decodedData) {
     //check here again for userId values
@@ -101,7 +101,7 @@ adminRouter.post("/sign-in",async function (req, res) {
   if(passwordMatch){
     const token=jwt.sign({
       id:admin._id.toString()
-    },JWT_SECRET);
+    },JWT_ADMIN_SECRET);
 
     res.json({
       token:token
